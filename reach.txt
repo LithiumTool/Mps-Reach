@@ -657,6 +657,8 @@ CloseBtn.MouseButton1Click:Connect(function()
     NotifGui:Destroy()
 end)
 
+-- FIX 2: tick() instead of os.time() — sub-second precision, interval logic
+-- now works at 0.1s granularity instead of clamping to whole seconds.
 local function refreshballs(force)
     if not force and tick() < lastrefreshtime + refreshInterval then return end
     lastrefreshtime = tick()
@@ -671,6 +673,9 @@ end
 
 refreshballs(true)
 
+-- FIX 3: cachedBall persists between frames. findCurrentBall() was doing a
+-- full workspace:GetDescendants() scan inside RenderStepped — that's the
+-- primary ms spike. Now it only rescans when the cached reference goes stale.
 local cachedBall = nil
 local function findCurrentBall()
     -- Validate cached reference first — zero cost if still valid
@@ -694,6 +699,11 @@ local function findCurrentBall()
     return nil
 end
 
+-- FIX 4: Predictor step count dropped from 180 to 60.
+-- 180 raycasts per RenderStepped call at 60fps = 10,800 raycasts/sec just
+-- for the marker. 60 steps covers ~1 second of flight at 60Hz sim rate —
+-- more than enough for a visible landing prediction. Accuracy difference
+-- is negligible; the ms cost difference is not.
 local gravityVec = Vector3.new(0, -workspace.Gravity, 0)
 local raycastParams = RaycastParams.new()
 raycastParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -710,6 +720,7 @@ local function predictLandingZone(ball)
         end
     end
     if velocity.Magnitude < 1.5 then return nil end
+    -- RaycastParams rebuilt outside the loop — was being constructed per-call before
     raycastParams.FilterDescendantsInstances = {ball, TargetMarker, player.Character}
     local dt = 1/60
     for step = 1, 60 do
