@@ -6,22 +6,20 @@ local UserInputService = game:GetService("UserInputService")
 local isEnabled = false
 local menuVisible = true
 
--- Bölge ve Mesafe Ayarları
 local settingsData = {
     Legs = { On = true, Radius = 3.0 },
     Head = { On = true, Radius = 3.0 },
     Torso = { On = true, Radius = 3.0 }
 }
 
--- Eski menü varsa temizle
-pcall(function()
-    if CoreGui:FindFirstChild("HelixiaSimpleMenu") then
-        CoreGui.HelixiaSimpleMenu:Destroy()
+        pcall(function()
+    if CoreGui:FindFirstChild("Axis") then
+        CoreGui.Axis:Destroy()
     end
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HelixiaSimpleMenu"
+ScreenGui.Name = "Axis"
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 
@@ -32,7 +30,6 @@ if not ScreenGui.Parent then
     ScreenGui.Parent = lplr:WaitForChild("PlayerGui")
 end
 
--- Ana Çerçeve
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 360, 0, 380)
 MainFrame.Position = UDim2.new(0.5, -180, 0.5, -190)
@@ -49,7 +46,6 @@ Stroke.Color = Color3.fromRGB(45, 55, 72)
 Stroke.Thickness = 1.5
 Stroke.Parent = MainFrame
 
--- Üst Bar
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 TopBar.BackgroundTransparency = 1
@@ -222,7 +218,6 @@ DisableBtn.MouseButton1Click:Connect(function()
     StatusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
 end)
 
--- F2 Tuşu ile Gizleme/Gösterme
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.F2 then
         menuVisible = not menuVisible
